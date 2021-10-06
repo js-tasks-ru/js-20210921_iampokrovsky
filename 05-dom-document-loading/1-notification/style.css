@@ -77,6 +77,7 @@ body {
   from {
     opacity: 0.8;
   }
+
   to {
     opacity: 0;
   }
@@ -86,8 +87,8 @@ body {
   from {
     width: 100%;
   }
+
   to {
     width: 0;
   }
 }
-
