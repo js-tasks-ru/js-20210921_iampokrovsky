@@ -58,7 +58,7 @@ describe('dom-document-loading/sortable-table-v1', () => {
   let sortableTable;
 
   beforeEach(() => {
-    sortableTable = new SortableTable(header, { data });
+    sortableTable = new SortableTable(header, data);
 
     document.body.append(sortableTable.element);
   });
