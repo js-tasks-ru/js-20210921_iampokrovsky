@@ -118,8 +118,8 @@ export default class SortableTable {
   sort(field, order = 'asc') {
     const multiplier = (order === 'asc') ? 1 : -1;
 
-    let sortable = this.headerConfig.filter(item => item.id === field)[0]?.sortable;
-    let sortType = this.headerConfig.filter(item => item.id === field)[0]?.sortType;
+    let sortable = this.headerConfig.filter(item => item.id === field)[0].sortable;
+    let sortType = this.headerConfig.filter(item => item.id === field)[0].sortType;
 
     if (sortable) {
       if (sortType === 'number') {
@@ -136,27 +136,17 @@ export default class SortableTable {
         });
       }
 
-      // TODO: Испрвить ошибку.
-      /**
-       * 
-       * Перерисовывать все дерево может быть
-       */
-
-      // const element = document.createElement('div');
-      // element.innerHTML = this.tableTemplate;
-      // this.element = element.firstElementChild;
-
-      // const element = document.createElement('div');
-      // element.innerHTML = this.bodyTemplate;
-      // this.subElements.body.replaceWith(element.firstElementChild);
-      // this.subElements = this.getSubElements();
-
       this.update();
     }
   }
 
+
+  // Все ок
+
   remove() {
-    this.element.remove();
+    if (this.element) {
+      this.element.remove();
+    }
   }
 
   destroy() {
