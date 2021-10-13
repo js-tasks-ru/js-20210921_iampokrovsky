@@ -2,8 +2,6 @@
  * TODO:
  * - сделать проверку на пустые данные
  * - правильно расставить const и let
- * - выбор активного заголовка
- * - фильтрация
  * - скрывать контент при отсутствующих результатах
  */
 
@@ -20,30 +18,30 @@ export default class SortableTable {
     this.render();
   }
 
-  // 1. Построить шапку таблицы
-
-
-  // get tableTemplate() {
-  //   return `<div data-element="productsContainer" class="products-list__container">${[this.headerTemplate, this.bodyTemplate].join('')}</div>`;
-  // }
-
   get tableTemplate() {
     return `
     <div data-element="productsContainer" class="products-list__container">
-      <div data-element="header" class="sortable-table__header sortable-table__row">${this.headerTemplate}</div>
-      <div data-element="body" class="sortable-table__body">${this.bodyTemplate}</div>
+      <div data-element="header" class="sortable-table__header sortable-table__row">${this.headerContentTemplate}</div>
+      <div data-element="body" class="sortable-table__body">${this.bodyContentTemplate}</div>
     </div>
     `;
   }
 
-  get headerTemplate() {
-    let content = [];
+  get headerContentTemplate() {
+    const content = [];
+    const sortArrowTemplate = `
+      <span data-element="arrow" class="sortable-table__sort-arrow">
+        <span class="sort-arrow"></span>
+      </span>
+    `;
 
     for (let headingData of this.headerConfig) {
-      let {id, title, sortable} = headingData;
+      let { id, title, sortable, order } = headingData;
+      let dataOrder = order ? `data-order="${order}"` : '';
       content.push(`
-      <div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}">
+      <div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}" ${dataOrder}>
         <span>${title}</span>
+        ${sortable ? sortArrowTemplate : ''}
       </div>
       `);
     }
@@ -51,10 +49,7 @@ export default class SortableTable {
     return content.join('');
   }
 
-  get bodyTemplate() {
-    console.log(this.data);
-
-
+  get bodyContentTemplate() {
     let content = [];
 
     let props = this.headerConfig.map((item => {
@@ -100,48 +95,44 @@ export default class SortableTable {
     return result;
   }
 
-  update(data) {
-    // Релизовать скрытие контента при отсутвующих результатах
-    // if (data.length) {
-    //   this.element.classList.toggle('column-chart_loading', false);
-    // } else {
-    //   this.element.classList.toggle('column-chart_loading', true);
-    // }
+  update(data = this.data) {
+    this.data = data;
 
-    if (data) {
-      this.data = data;
-    }
-
-    this.subElements.body.innerHTML = this.bodyTemplate;
+    this.subElements.header.innerHTML = this.headerContentTemplate;
+    this.subElements.body.innerHTML = this.bodyContentTemplate;
   }
 
   sort(field, order = 'asc') {
-    const multiplier = (order === 'asc') ? 1 : -1;
+    const multiplier = {
+      'asc': 1,
+      'desc': -1
+    };
 
-    let sortable = this.headerConfig.filter(item => item.id === field)[0].sortable;
-    let sortType = this.headerConfig.filter(item => item.id === field)[0].sortType;
+    const fieldConfig = this.headerConfig.find(item => item.id === field);
+    const isSortable = fieldConfig.sortable;
+    const sortType = fieldConfig.sortType;
 
-    if (sortable) {
+    if (isSortable && sortType) {
+
+      fieldConfig.order = order;
+      
       if (sortType === 'number') {
         this.data.sort((a, b) => {
-          if (a[field] > b[field]) {return multiplier * 1;}
-          if (a[field] == b[field]) {return multiplier * 0;}
-          if (a[field] < b[field]) {return multiplier * -1;}
+          if (a[field] > b[field]) {return multiplier[order] * 1;}
+          if (a[field] == b[field]) {return multiplier[order] * 0;}
+          if (a[field] < b[field]) {return multiplier[order] * -1;}
         });
       }
 
       if (sortType === 'string') {
         this.data.sort((a, b) => {
-          return multiplier * a[field].localeCompare(b[field], ['ru', 'en'], {caseFirst: 'upper'});
+          return multiplier[order] * a[field].localeCompare(b[field], ['ru', 'en'], {caseFirst: 'upper'});
         });
       }
 
       this.update();
     }
   }
-
-
-  // Все ок
 
   remove() {
     if (this.element) {

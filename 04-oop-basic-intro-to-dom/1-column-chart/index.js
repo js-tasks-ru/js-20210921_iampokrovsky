@@ -90,6 +90,5 @@ export default class ColumnChart {
     this.remove();
     this.element = null;
     this.updatableElements = {};
-
   }
 }
