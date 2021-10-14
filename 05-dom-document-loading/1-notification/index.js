@@ -1,5 +1,5 @@
 export default class NotificationMessage {
-  static currentInstance;
+  static activeNotification;
   static types = ['success', 'error'];
   type;
   message;
@@ -7,11 +7,10 @@ export default class NotificationMessage {
   element;
   timer;
 
-  constructor(
-    message = '', {
-      duration = 2000,
-      type = 'success'
-    } = {}) {
+  constructor(message = '', {
+    duration = 2000,
+    type = 'success'
+  } = {}) {
     this.message = message;
     this.duration = duration;
 
@@ -19,18 +18,12 @@ export default class NotificationMessage {
       this.type = type;
     }
 
-    if (NotificationMessage.currentInstance) {
-      NotificationMessage.currentInstance.destroy();
-    }
-
-    NotificationMessage.currentInstance = this;
-
     this.render();
   }
 
   get template() {
     return `
-      <div class="notification ${this.type}" style="--value:${this.duration}ms">
+      <div class="notification ${this.type}" style="--value:${this.duration / 1000}s">
         <div class="timer"></div>
         <div class="inner-wrapper">
           <div class="notification-header">${this.type}</div>
@@ -46,22 +39,29 @@ export default class NotificationMessage {
     this.element = element.firstElementChild;
   }
 
-  show(targetElement = document.body) {
-    targetElement.append(this.element);
-    this.initCountdown();
-  }
+  show(parent = document.body) {
+    if (NotificationMessage.activeNotification) {
+      NotificationMessage.activeNotification.remove();
+    }
 
-  initCountdown() {
-    this.timer = setTimeout(() => this.destroy(), this.duration);
+    parent.append(this.element);
+
+    this.timer = setTimeout(() => this.remove(), this.duration);
+
+    NotificationMessage.activeNotification = this;
   }
 
   remove() {
     clearTimeout(this.timer);
-    this.element.remove();
+
+    if (this.element) {
+      this.element.remove();
+    }
   }
 
   destroy() {
     this.remove();
-    NotificationMessage.currentInstance = null;
+    this.element = null;
+    NotificationMessage.activeNotification = null;
   }
 }
