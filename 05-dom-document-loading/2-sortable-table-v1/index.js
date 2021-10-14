@@ -1,16 +1,8 @@
-/**
- * TODO:
- * - сделать проверку на пустые данные
- * - правильно расставить const и let
- * - скрывать контент при отсутствующих результатах
- */
-
 export default class SortableTable {
-  element; // Элемент всей таблицы
+  element;
   subElements = {};
   headerConfig;
   data;
-
 
   constructor(headerConfig = [], data = []) {
     this.headerConfig = headerConfig;
@@ -36,8 +28,8 @@ export default class SortableTable {
     `;
 
     for (let headingData of this.headerConfig) {
-      let { id, title, sortable, order } = headingData;
-      let dataOrder = order ? `data-order="${order}"` : '';
+      const { id, title, sortable = false, order } = headingData;
+      const dataOrder = order ? `data-order="${order}"` : '';
       content.push(`
       <div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}" ${dataOrder}>
         <span>${title}</span>
@@ -50,17 +42,15 @@ export default class SortableTable {
   }
 
   get bodyContentTemplate() {
-    let content = [];
+    const content = [];
 
-    let props = this.headerConfig.map((item => {
-      return item.id;
-    }));
+    const props = this.headerConfig.map((item => item.id));
 
     for (let item of this.data) {
-      let itemContent = [];
+      const itemContent = [];
 
       for (let prop of props) {
-        let template = this.headerConfig.filter(item => item.id === prop)[0].template;
+        const template = this.headerConfig.find(item => item.id === prop).template;
 
         if (template) {
           itemContent.push(template(item[prop]));
@@ -97,7 +87,6 @@ export default class SortableTable {
 
   update(data = this.data) {
     this.data = data;
-
     this.subElements.header.innerHTML = this.headerContentTemplate;
     this.subElements.body.innerHTML = this.bodyContentTemplate;
   }
@@ -115,16 +104,17 @@ export default class SortableTable {
     if (isSortable && sortType) {
 
       fieldConfig.order = order;
-      
-      if (sortType === 'number') {
-        this.data.sort((a, b) => {
-          if (a[field] > b[field]) {return multiplier[order] * 1;}
-          if (a[field] == b[field]) {return multiplier[order] * 0;}
-          if (a[field] < b[field]) {return multiplier[order] * -1;}
-        });
-      }
 
-      if (sortType === 'string') {
+      switch (sortType) {
+      case 'number':
+        this.data.sort((a, b) => {
+          
+          if (a[field] > b[field]) { return multiplier[order] * 1; }
+          if (a[field] == b[field]) { return multiplier[order] * 0; }
+          if (a[field] < b[field]) { return multiplier[order] * -1; }
+        });
+        break;
+      case 'string':
         this.data.sort((a, b) => {
           return multiplier[order] * a[field].localeCompare(b[field], ['ru', 'en'], {caseFirst: 'upper'});
         });
@@ -133,7 +123,7 @@ export default class SortableTable {
       this.update();
     }
   }
-
+  
   remove() {
     if (this.element) {
       this.element.remove();
