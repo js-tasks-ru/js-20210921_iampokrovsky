@@ -1,6 +1,6 @@
 export default class ColumnChart {
   element;
-  updatableElements = {};
+  subElements = {};
   chartHeight = 50;
 
   constructor({
@@ -23,7 +23,7 @@ export default class ColumnChart {
     const element = document.createElement("div");
     element.innerHTML = this.template;
     this.element = element.firstElementChild;
-    this.updatableElements = this.getUpdatableElements();
+    this.subElements = this.getsubElements();
   }
 
   get template() {
@@ -53,10 +53,10 @@ export default class ColumnChart {
       this.element.classList.toggle('column-chart_loading', true);
     }
 
-    this.updatableElements.body.innerHTML = this.getColumnBody(data);
+    this.subElements.body.innerHTML = this.getColumnBody(data);
   }
 
-  getUpdatableElements() {
+  getsubElements() {
     const result = {};
     const elements = this.element.querySelectorAll('[data-element]');
 
@@ -89,7 +89,6 @@ export default class ColumnChart {
   destroy() {
     this.remove();
     this.element = null;
-    this.updatableElements = {};
-
+    this.subElements = {};
   }
 }
